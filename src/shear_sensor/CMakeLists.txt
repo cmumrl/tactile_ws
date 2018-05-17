@@ -11,9 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  roslaunch
   message_generation
 )
 
+roslaunch_add_file_check(launch)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -48,10 +50,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-#add_message_files(
- # FILES
- # cap.msg
-#)
+add_message_files(
+  FILES
+  cap.msg
+)
 
 ## Generate services in the 'srv' folder
 add_service_files(
@@ -67,10 +69,10 @@ add_service_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -106,6 +108,7 @@ catkin_package(
 #  LIBRARIES shear_sensor
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime
 )
 
 ###########

@@ -21,7 +21,8 @@ from reflex_msgs.srv import SetTactileThreshold, SetTactileThresholdRequest
 
 
 hand_state = Hand()
-cap =1046
+cap = 1046
+mean = 1046
 list_cap=collections.deque(maxlen=100)
 
 def main():
@@ -43,7 +44,7 @@ def main():
     command_pub = rospy.Publisher('/reflex_takktile/command', Command, queue_size=1)
     pos_pub = rospy.Publisher('/reflex_takktile/command_position', PoseCommand, queue_size=1)
     vel_pub = rospy.Publisher('/reflex_takktile/command_velocity', VelocityCommand, queue_size=1)
-    force_pub = rospy.Publisher('/reflex_takktile/command_motor_force', ForceCommand, queue_size=1)
+    force_pub = rospy.Publisher('/reflex_takktile/command_motor_force', ForceCommand, queue_size=1, latch=True)
 
     # Constantly capture the current hand state
     rospy.Subscriber('/reflex_takktile/hand_state', Hand, hand_state_cb)
@@ -56,10 +57,11 @@ def main():
 #
     ##################################################################################################################
     # Demonstration of position control
+    rospy.sleep(1.0)
+    pos_pub.publish(PoseCommand(f1=2.3, f2=2.3, f3=2.3, preshape=0.0))
     rospy.sleep(2.0)
-    pos_pub.publish(PoseCommand(f1=1.0, f2=1.0, f3=3.0, preshape=0.0))
-    rospy.sleep(5.0)
     
+    rospy.loginfo("Ready to use the sensor control")
     while not rospy.is_shutdown():
 #check()    
 #def check(): 
@@ -76,30 +78,23 @@ def main():
        # 	rospy.sleep(1.0)
 
 	#force control
-         rospy.Subscriber('chatter', Float64, callback)
+         rospy.Subscriber('capacitance', Float64, cap_cb)
+         rospy.Subscriber('mean', Float64, mean_cb)
          rospy.loginfo(rospy.get_caller_id() + "in the loop %s", cap)
-	 if cap - 100000 > 100000 and cap - 100000 < 200000:
+	 if cap - mean > 1 and cap - mean < 2:
 	 	force_pub.publish(ForceCommand(f3=50.0))
-        	rospy.sleep(5.0)
-	 	force_pub.publish(ForceCommand(f3=0.0))
-        	rospy.sleep(5.0)
-	 elif cap - 100000 > 400000 and cap - 10000 < 1000000:
+        	rospy.sleep(1.0)
+	 elif cap - mean > 2 and cap - mean < 3:
 		force_pub.publish(ForceCommand(f3=75.0))
-        	rospy.sleep(5.0)
-		force_pub.publish(ForceCommand(f3=0.0))
-        	rospy.sleep(5.0)
-	 elif cap - 100000 > 1000000:
+        	rospy.sleep(1.0)
+	 elif cap - mean > 3:
 		force_pub.publish(ForceCommand(f3=100.0))
-        	rospy.sleep(5.0)
-		force_pub.publish(ForceCommand(f3=0.0))
-        	rospy.sleep(5.0)
-	 elif cap - 100000 <= 0:
-        	pos_pub.publish(PoseCommand(f1=1.0, f2=1.0, f3=2.0, preshape=0.0))
-        	rospy.sleep(3.0)
-        	pos_pub.publish(PoseCommand(f1=1.0, f2=1.0, f3=3.0, preshape=0.0))	
-        	rospy.sleep(3.0)
-  
-
+        	rospy.sleep(1.0)
+	 elif cap - mean <= -1:
+        	pos_pub.publish(PoseCommand(f1=0.0, f2=0.0, f3=0.0, preshape=0.0))
+        	rospy.sleep(2.0)
+        	pos_pub.publish(PoseCommand(f1=2.3, f2=2.3, f3=2.3, preshape=0.0))	
+        	rospy.sleep(1.0)
 
 #    raw_input("== When ready to wiggle fingers with position control, hit [Enter]\n")
 #    for i in range(100):
@@ -199,10 +194,15 @@ def hand_state_cb(data):
     global hand_state
     hand_state = data
 
-def callback(data):
+def cap_cb(data):
     #rospy.loginfo(rospy.get_caller_id() + "capcitance read %s", data.data)
     global cap 
     cap = data.data   
+
+def mean_cb(data):
+    #rospy.loginfo(rospy.get_caller_id() + "capcitance read %s", data.data)
+    global mean 
+    mean = data.data   
 	
 if __name__ == '__main__':
     main()

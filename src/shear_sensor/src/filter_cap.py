@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import rospy
-import matplotlib.pyplot as plt
 import builtins
 import collections
 import numpy as np
+import matplotlib.pyplot as plt
 from std_msgs.msg import String
 from std_msgs.msg import Float64
+from shear_sensor.msg import cap
 from scipy.signal import savgol_filter
 
 # create the list of capacitance
@@ -16,9 +17,12 @@ cap_list_mean=collections.deque(maxlen=200)
 capacitance = 100.00
 mean_cap = 100.00
 
+# Mean list size
+mean_size = 200
+
 # set up publisher
-pub_cap = rospy.Publisher('capacitance_val', Float64)
-pub_mean = rospy.Publisher('mean_cap', Float64)
+pub_cap = rospy.Publisher('capacitance_val', cap)
+msg = cap()
 
 def callback(data):
     # Create the list to filter and calculate mean
@@ -30,11 +34,12 @@ def callback(data):
        y = savgol_filter(cap_list, 15, 2)
        cap_list_mean.append(y[-1])
        capacitance = y[-1]
-       pub_cap.publish(Float64(capacitance))
-       if len(cap_list_mean) == 200 :
+       if len(cap_list_mean) == mean_size :
        		mean_cap = np.mean(cap_list_mean)
-       		pub_mean.publish(Float64(mean_cap))
-                rospy.loginfo("capacitance  %s and mean %s" % (capacitance, mean_cap))
+       	        msg.capacitance = capacitance
+       	        msg.mean = mean_cap
+		pub_cap.publish(msg)
+                rospy.loginfo("capacitance %s and mean %s" % (msg.capacitance, msg.mean))
         
 def listener():
 
