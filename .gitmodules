@@ -1,6 +1,0 @@
-[submodule "src/reflex-ros-pkg"]
-	path = src/reflex-ros-pkg
-	url = https://github.com/rishabhagarwal880/reflex-ros-pkg.git
-[submodule "src/takktile_ros"]
-	path = src/takktile_ros
-	url = https://github.com/rishabhagarwal880/takktile_ros.git
