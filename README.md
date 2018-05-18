@@ -48,5 +48,5 @@ roslaunch shear_sensor shear.launch
 The module should start publishing the unprocessed capacitance data on `/chatter` and the processed capacitance data on `/capacitance_val`.
 
 ## Maintainers
-@rishabhagarwal880
+[@rishabhagarwal880](https://github.com/rishabhagarwal880)
 
